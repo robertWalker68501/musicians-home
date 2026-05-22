@@ -24,7 +24,7 @@ import { SignUpFormSchema } from '@/lib/schemas/SignUpFormSchema';
 const SignUpForm = () => {
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof SignUpFormSchema>>({
+  const form = useForm<z.input<typeof SignUpFormSchema>>({
     resolver: zodResolver(SignUpFormSchema),
     defaultValues: {
       name: '',
@@ -38,14 +38,15 @@ const SignUpForm = () => {
   const { isSubmitting } = form.formState;
 
   const onSubmit = async (data: z.infer<typeof SignUpFormSchema>) => {
-    const { name, email, username, password } = data;
+    const { name, email, password, username } = data;
+    const normalizedUsername = username?.trim();
 
     await authClient.signUp.email(
       {
         name,
         email,
         password,
-        username,
+        ...(normalizedUsername ? { username: normalizedUsername } : {}),
       },
       {
         onSuccess: () => {
@@ -53,9 +54,10 @@ const SignUpForm = () => {
           router.refresh();
           router.push('/');
         },
-        onError: () => {
+        onError: (ctx) => {
           toast.error('Error signing up');
-          router.push('/sign-in');
+          router.push('/');
+          console.error(ctx.error.message);
         },
       }
     );
@@ -64,8 +66,10 @@ const SignUpForm = () => {
   return (
     <Card className='mx-auto max-w-lg'>
       <CardHeader>
-        <CardTitle>Sign Up</CardTitle>
-        <CardDescription>Sign up and start sharing your ideas</CardDescription>
+        <CardTitle className='text-xl'>Sign Up</CardTitle>
+        <CardDescription>
+          Fields marked with an asterisk are required
+        </CardDescription>
       </CardHeader>
       <form
         id='sign-up-form'
@@ -76,7 +80,7 @@ const SignUpForm = () => {
             <FormFieldControl
               control={form.control}
               name='name'
-              label='Name'
+              label='Name *'
               type='text'
               placeholder='John Doe'
               autoComplete='name'
@@ -84,7 +88,7 @@ const SignUpForm = () => {
             <FormFieldControl
               control={form.control}
               name='email'
-              label='Email'
+              label='Email *'
               type='email'
               placeholder='john.doe@example.com'
               autoComplete='email'
@@ -100,7 +104,7 @@ const SignUpForm = () => {
             <FormFieldControl
               control={form.control}
               name='password'
-              label='Password'
+              label='Password *'
               type='password'
               placeholder='********'
               autoComplete='off'
@@ -108,14 +112,14 @@ const SignUpForm = () => {
             <FormFieldControl
               control={form.control}
               name='confirmPassword'
-              label='Confirm Password'
+              label='Confirm Password *'
               type='password'
               placeholder='********'
               autoComplete='off'
             />
           </FieldGroup>
         </CardContent>
-        <CardFooter>
+        <CardFooter className='mt-6'>
           <Field orientation='horizontal'>
             <Button
               type='button'

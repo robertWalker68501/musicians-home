@@ -9,8 +9,11 @@ export const SignUpFormSchema = z
     email: z.email(),
     username: z
       .string()
+      .trim()
       .min(4, 'Username must be at least 4 characters long')
-      .max(20, 'Username cannot exceed 20 characters'),
+      .max(20, 'Username cannot exceed 20 characters')
+      .optional()
+      .or(z.literal('')),
     password: z
       .string()
       .min(8, 'Password must be at least 8 characters long')
