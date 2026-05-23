@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../app/generated/prisma"
 }
 
@@ -13,6 +13,7 @@ model User {
   email         String
   emailVerified Boolean   @default(false)
   image         String?
+  bio           String?
   threads       Thread[]
   comments      Comment[]
 

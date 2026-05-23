@@ -14,6 +14,8 @@ export const SignUpFormSchema = z
       .max(20, 'Username cannot exceed 20 characters')
       .optional()
       .or(z.literal('')),
+    image: z.string().optional(),
+    bio: z.string().optional(),
     password: z
       .string()
       .min(8, 'Password must be at least 8 characters long')
@@ -22,5 +24,6 @@ export const SignUpFormSchema = z
     callbackURL: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: 'Password must be at least 8 characters long',
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
   });
